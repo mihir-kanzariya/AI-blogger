@@ -1,6 +1,8 @@
 import os
 import re
 import bs4
+
+from googlesearch import search  # Import for Google Search
 from langchain_community.tools import DuckDuckGoSearchResults
 from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
 from langchain_core.prompts import PromptTemplate
@@ -10,45 +12,47 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores import FAISS
-        
+
 class BlogPostCreator:
     def __init__(self, keyword, number_of_web_references):
-            self.keyword = keyword
-            self.number_of_web_references = number_of_web_references
+        self.keyword = keyword
+        self.number_of_web_references = number_of_web_references
 
-    def parse_links(self, search_results: str):
-            print("-----------------------------------")
-            print("Parsing links ...")
-            return re.findall(r'link:\s*(https?://[^\],\s]+)', search_results)
+    def parse_links(self, search_results):
+        print("-----------------------------------")
+        print("Parsing links ...")
+        # No need for regex parsing here since `googlesearch-python` directly provides links
+        return search_results
 
     def save_file(self, content: str, filename: str):
-            print("-----------------------------------")
-            print("Saving file in blogs ...")
-            directory = "blogs"
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            filepath = os.path.join(directory, filename)
-            with open(filepath, 'w') as f:
-                f.write(content)
-            print(f" 🥳 File saved as {filepath}")
+        print("-----------------------------------")
+        print("Saving file in blogs ...")
+        directory = "blogs"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        filepath = os.path.join(directory, filename)
+        with open(filepath, 'w') as f:
+            f.write(content)
+        print(f" 🥳 File saved as {filepath}")
 
     def get_links(self):
-            try:
-                print("-----------------------------------")
-                print("Getting links ...")
+        try:
+            print("-----------------------------------")
+            print("Getting links using Google...")
 
-                wrapper = DuckDuckGoSearchAPIWrapper(max_results=self.number_of_web_references)
-                search = DuckDuckGoSearchResults(api_wrapper=wrapper)
-                results = search.run(tool_input=self.keyword)
+            # Convert the generator to a list
+            results = list(search(self.keyword, num_results=self.number_of_web_references))
 
-                links = []
-                for link in self.parse_links(results):
-                    links.append(link)
+            # Parse links (if necessary, e.g., further processing)
+            links = self.parse_links(results)
+            print("Retrieved links:")
+            for idx, link in enumerate(links, start=1):
+                print(f"{idx}. {link}")
 
-                return links
+            return links
 
-            except Exception as e:
-                print(f"An error occurred while getting links: {e}")
+        except Exception as e:
+            print(f"An error occurred while getting links: {e}")
 
     def create_blog_post(self):
             try:
@@ -70,7 +74,8 @@ class BlogPostCreator:
                 bs4_strainer = bs4.SoupStrainer(('p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'))
 
                 document_loader = WebBaseLoader(
-                    web_path=(self.get_links())
+                        web_path=self.get_links()  # `get_links` now returns a list of strings
+
                 )
 
                 docs = document_loader.load()
@@ -85,7 +90,7 @@ class BlogPostCreator:
                 retriever = vector_store.as_retriever(search_type="similarity", search_kwards={"k": 10})
 
                 # step 5 : Generation
-                llm = ChatOpenAI(model="got-4o-mini")
+                llm = ChatOpenAI(model="gpt-4o-mini") 
 
                 template = """
                     Given the following information, generate a blog post                   
