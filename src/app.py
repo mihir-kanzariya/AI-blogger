@@ -1,6 +1,9 @@
 import streamlit as st
+from dotenv import load_dotenv
+
 import os
 from blogpostcreator import BlogPostCreator
+load_dotenv()
 
 with st.sidebar:
     "## ✍️ Blog Post Generator"
@@ -22,12 +25,12 @@ with st.sidebar:
         value=3,
     )
     
-    openai_api_key = st.text_input(
-        label="OpenAI API Key",
-        type="password"
-        )
+    # openai_api_key = st.text_input(
+    #     label="OpenAI API Key",
+    #     type="password"
+    #     )
     
-    os.environ['OPENAI_API_KEY'] = openai_api_key
+    # os.environ['OPENAI_API_KEY'] = openai_api_key
 
     st.divider()
 
@@ -39,10 +42,6 @@ with st.sidebar:
     It also allows you to specify a number of web links to use. 
     It only allows a maximum of 10.
 
-    This agent is a work in progress and you can contribute to it on [Github](https://github.com/jordan-jakisa/blog_post_writer) 
-    with your feedback and suggestions.
-
-    Made with ❤️ from Uganda by [jordan-jakisa](https://github.com/jordan-jakisa)
     """
 
     st.divider()
@@ -62,8 +61,7 @@ with st.sidebar:
     #### How do I get an OpenAI API key?
     You can get an OpenAI API key by signing up at [OpenAI](https://platform.openai.com/account/api-keys).
 
-    #### How do I contribute to the project?
-    You can contribute to the project on [Github](https://github.com/jordan-jakisa/blog_post_writer)
+    
 
     """
 
@@ -76,7 +74,7 @@ with st.sidebar:
 
 st.title(" ✍️ Blog Post Generator ")
 
-if not openai_api_key:      
+if not os.environ['OPENAI_API_KEY']:      
     st.info("Enter your OpenAI API key in the sidebar. You can get a key at https://platform.openai.com/account/api-keys.")
 
 with st.form(key="generate_blog_post"):
@@ -84,7 +82,7 @@ with st.form(key="generate_blog_post"):
 
     submitted = st.form_submit_button("Generate blog post")
     
-if submitted  and not openai_api_key:
+if submitted  and not os.environ['OPENAI_API_KEY']:
         st.info("Please enter your OpenAI API key", icon="ℹ️")
         
 elif submitted and not keyword:
