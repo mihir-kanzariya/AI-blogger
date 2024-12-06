@@ -12,9 +12,8 @@ with st.sidebar:
 
     """
     1. Enter the number of web references you want to use. (Max 10).
-    2. Enter your [OpenAI API key](https://platform.openai.com/api-keys) below.
-    3. Enter the keyword you want to generate a blog post for.
-    4. Click on the "Generate blog post" button.
+    2. Enter the keyword you want to generate a blog post for.
+    3. Click on the "Generate blog post" button.
 
     """
             
@@ -74,7 +73,7 @@ with st.sidebar:
 
 st.title(" ✍️ Blog Post Generator ")
 
-if not os.environ['OPENAI_API_KEY']:      
+if not st.secrets['OPENAI_API_KEY']:      
     st.info("Enter your OpenAI API key in the sidebar. You can get a key at https://platform.openai.com/account/api-keys.")
 
 with st.form(key="generate_blog_post"):
@@ -82,24 +81,36 @@ with st.form(key="generate_blog_post"):
 
     submitted = st.form_submit_button("Generate blog post")
     
-if submitted  and not os.environ['OPENAI_API_KEY']:
+if submitted  and not st.secrets['OPENAI_API_KEY']:
         st.info("Please enter your OpenAI API key", icon="ℹ️")
         
 elif submitted and not keyword:
         st.warning("Please enter a keyword", icon="⚠️")
         
 elif submitted:
-    creator = BlogPostCreator(keyword, web_references)       
-    response = creator.create_blog_post()
+    creator = BlogPostCreator(keyword, web_references)     
+    links = creator.get_links()
+    intialMessage = "Generating your blog post with the provided links.."
+    intialMessage += ", References:" + ", ".join(f"- {link}" for link in links)
 
-    if response is None or not response:
-          st.status("Generating ... ")    
-    elif isinstance(response, Exception):
-            st.warning("An error occured. Please try again!")
-            st.error(response, icon="🚨")
-    
-    else:
-            st.write("### Generated blog post")
-            st.write(response)
-            st.snow()
+
+
+    with st.spinner(intialMessage):
+        try:
+            # creator = BlogPostCreator(keyword, web_references)       
+            response = creator.create_blog_post()
+                
+            if not response:
+
+                st.warning("warnng ... ")    
+            else :
+                st.success("Blog post generated successfully!")
+                st.write("### Generated Blog Post")
+                st.write(response)
+                st.snow()
+        except Exception as e:
+            st.error("An error occurred while generating the blog post.")
+            st.error(f"Details: {e}", icon="🚨")       
+
+    # st.status("Generating ... 1 ")   # i want to update st streamlit updates once blog post is generated successfullly, i feel this is not the right place to update state , can you add this status at right place and make it completed once status 
 
