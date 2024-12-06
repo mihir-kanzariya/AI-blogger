@@ -19,7 +19,7 @@ with st.sidebar:
             
     web_references = st.number_input(
         label="Enter number of web references to use",
-        max_value=10,
+        max_value=5,
         min_value=1,
         value=3,
     )
