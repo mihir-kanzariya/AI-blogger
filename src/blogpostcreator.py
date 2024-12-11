@@ -13,10 +13,16 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores import FAISS
 
+import os
+import requests
+
 class BlogPostCreator:
-    def __init__(self, keyword, number_of_web_references):
+    def __init__(self, keyword, number_of_web_references, wp_url, wp_user, wp_pass):
         self.keyword = keyword
         self.number_of_web_references = number_of_web_references
+        self.wp_url = wp_url
+        self.wp_user = wp_user
+        self.wp_pass = wp_pass
 
     def parse_links(self, search_results):
         print("-----------------------------------")
@@ -34,6 +40,34 @@ class BlogPostCreator:
         with open(filepath, 'w') as f:
             f.write(content)
         print(f" 🥳 File saved as {filepath}")
+    
+    def postwordpress(self, content: str, title: str, category_id=1):  # Default category_id 1 (Uncategorized)
+        print("-----------------------------------")
+        print("Posting content to WordPress ...")
+        
+        # Construct the endpoint for WordPress REST API
+        url = f"{self.wp_url}/wp-json/wp/v2/posts"
+        
+        # Prepare the payload for the POST request
+        payload = {
+            'title': title,
+            'content': content,
+            'status': 'draft',  # To directly publish the post
+            'categories': [category_id]  # Pass the category ID instead of name
+        }
+
+        # Authentication using Application Password
+        auth = (self.wp_user, self.wp_pass)  # Use the application password here
+        
+        # Make the POST request to create the post
+        response = requests.post(url, json=payload, auth=auth)
+        
+        if response.status_code == 201:
+            print(f"✅ Post successfully created: {response.json()['link']}")
+        else:
+            print(f"❌ Failed to create post. Error: {response.status_code} - {response.text}")
+
+
 
     def get_links(self):
         try:
@@ -58,9 +92,12 @@ class BlogPostCreator:
             try:
                 print("-----------------------------------")
                 print("Creating blog post ...")
+                wp_url="https://wp-admin.pdfgpt.io/"
+                wp_user="utsav.prajapati@bacancy.com"
+                wp_pass="i5llP@XHuwG&EIIjuZuTCI2f"  # Add your WordPress credentials her
 
                 # Define self and docs variables
-                self = BlogPostCreator(keyword=self.keyword, number_of_web_references=self.number_of_web_references)
+                self = BlogPostCreator(keyword=self.keyword, number_of_web_references=self.number_of_web_references,  wp_url=wp_url, wp_user=wp_user, wp_pass=wp_pass)
                 docs = []
 
                 # Define splitter variable
@@ -281,7 +318,32 @@ class BlogPostCreator:
 - Demonstrate Trustworthiness: Include testimonials or expert recommendations.
 
 
+Use simple indian english, human tone, avoid starting by "In today's fast-paced world," and similar kind of sentences, use simple english words, Do not use any type of hook to start blog or any paragraph,
+The content should be tailored for a [specific audience: e.g., students, professionals, researchers] and include the following elements based on the nature of the topic:
 
+Engaging Hook: Start with a compelling hook or attention-grabbing statement to draw the reader in.
+
+Context/Background Information: Provide brief background or context on the topic to set the stage for the discussion.
+
+Clear Structure: Break the content into clear, logically structured sections (e.g., introduction, body, conclusion), using transitional phrases to connect ideas smoothly.
+
+Tone:
+
+If the topic is informative or academic, maintain a formal, neutral tone.
+If the topic is motivational or self-improvement, use an inspirational, encouraging tone.
+For persuasive content, adopt a convincing and authoritative tone.
+For casual or conversational topics, use a friendly, approachable tone.
+Examples and Anecdotes: Include relevant examples or short anecdotes that help clarify the topic and make it relatable to the audience.
+
+Analogies and Metaphors: If appropriate, use analogies or metaphors to simplify complex ideas and make them easier to understand.
+
+Problem-Solution Structure: If the topic involves challenges, outline the problem and propose practical solutions, offering actionable insights or recommendations.
+
+Rhetorical Questions: Use rhetorical questions to engage the reader and provoke thought.
+
+Data and Statistics: Include relevant data, facts, or research findings to support claims, making the content more credible.
+
+Emotional Appeal: When appropriate, appeal to the reader's emotions, especially for topics related to personal growth, challenges, or motivation.
                     
 
                     Context: {context}

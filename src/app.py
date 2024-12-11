@@ -1,5 +1,8 @@
 import streamlit as st
 from dotenv import load_dotenv
+import markdown
+
+
 
 import os
 from blogpostcreator import BlogPostCreator
@@ -19,7 +22,7 @@ with st.sidebar:
             
     web_references = st.number_input(
         label="Enter number of web references to use",
-        max_value=5,
+        max_value=10,
         min_value=1,
         value=3,
     )
@@ -67,50 +70,57 @@ with st.sidebar:
     st.divider()
 
 
-    
+
+
     
 
 
 st.title(" ✍️ Blog Post Generator ")
 
+
 if not st.secrets['OPENAI_API_KEY']:      
     st.info("Enter your OpenAI API key in the sidebar. You can get a key at https://platform.openai.com/account/api-keys.")
 
 with st.form(key="generate_blog_post"):
-    keyword = st.text_input(label= "Enter a keyword", placeholder="")
-
+    keyword = st.text_input(label="Enter a keyword", placeholder="")
     submitted = st.form_submit_button("Generate blog post")
     
-if submitted  and not st.secrets['OPENAI_API_KEY']:
-        st.info("Please enter your OpenAI API key", icon="ℹ️")
+if submitted and not st.secrets['OPENAI_API_KEY']:
+    st.info("Please enter your OpenAI API key", icon="ℹ️")
         
 elif submitted and not keyword:
-        st.warning("Please enter a keyword", icon="⚠️")
+    st.warning("Please enter a keyword", icon="⚠️")
         
 elif submitted:
-    creator = BlogPostCreator(keyword, web_references)     
+    # Ensure the WordPress credentials are passed
+    wp_url="https://wp-admin.pdfgpt.io/"
+    wp_user="kanzariyamihir@gmail.com"
+    wp_pass="Hp3@DmocW!*DE9v(Zbmx0ST!"  # Add your WordPress credentials her
+    
+    creator = BlogPostCreator(keyword, web_references, wp_url, wp_user, wp_pass)  # Pass the required arguments
+
     links = creator.get_links()
     intialMessage = "Generating your blog post with the provided links.."
     intialMessage += ", References:" + ", ".join(f"- {link}" for link in links)
 
-
-
     with st.spinner(intialMessage):
         try:
-            # creator = BlogPostCreator(keyword, web_references)       
+            # Generate the blog post content
             response = creator.create_blog_post()
                 
             if not response:
-
-                st.warning("warnng ... ")    
-            else :
+                st.warning("Warning: Could not generate the blog post.")    
+            else:
                 st.success("Blog post generated successfully!")
                 st.write("### Generated Blog Post")
                 st.write(response)
+                
+                # Now post the blog content to WordPress
+                title = "Generated Blog Post: " + keyword  # You can customize the title
+                html = markdown.markdown(response)
+                creator.postwordpress(content=html, title=title)
+                
                 st.snow()
         except Exception as e:
             st.error("An error occurred while generating the blog post.")
-            st.error(f"Details: {e}", icon="🚨")       
-
-    # st.status("Generating ... 1 ")   # i want to update st streamlit updates once blog post is generated successfullly, i feel this is not the right place to update state , can you add this status at right place and make it completed once status 
-
+            st.error(f"Details: {e}", icon="🚨")
