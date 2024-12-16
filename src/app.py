@@ -120,8 +120,8 @@ elif submitted:
                 
                 # Now post the blog content to WordPress
                 title = "Generated Blog Post: " + keyword  # You can customize the title
-                # html = markdown.markdown(response)
-                # creator.postwordpress(content=html, title=title)
+                html = markdown.markdown(response)
+                creator.postwordpress(content=html, title=title)
                 
                 st.snow()
         except Exception as e:
