@@ -83,6 +83,9 @@ if not st.secrets['OPENAI_API_KEY']:
 
 with st.form(key="generate_blog_post"):
     keyword = st.text_input(label="Enter a keyword", placeholder="")
+    # Here Add one more text box to accept prompt from user, which will be optional.
+    userprompt = st.text_area(label="Optional: Enter a custom prompt", placeholder="Type your custom prompt here (optional)", height=150)
+
     submitted = st.form_submit_button("Generate blog post")
     
 if submitted and not st.secrets['OPENAI_API_KEY']:
@@ -93,11 +96,11 @@ elif submitted and not keyword:
         
 elif submitted:
     # Ensure the WordPress credentials are passed
-    wp_url="https://wp-admin.pdfgpt.io/"
-    wp_user="kanzariyamihir@gmail.com"
-    wp_pass="Hp3@DmocW!*DE9v(Zbmx0ST!"  # Add your WordPress credentials her
-    
-    creator = BlogPostCreator(keyword, web_references, wp_url, wp_user, wp_pass)  # Pass the required arguments
+    wp_url=st.secrets['WP_URL']
+    wp_user=st.secrets['WP_USER']
+    wp_pass=st.secrets['WP_PASS']  # Add your WordPress credentials her
+    print("userprompt", userprompt)
+    creator = BlogPostCreator(keyword, web_references, wp_url, wp_user, wp_pass, userprompt)  # Pass the required arguments
 
     links = creator.get_links()
     intialMessage = "Generating your blog post with the provided links.."
@@ -117,8 +120,8 @@ elif submitted:
                 
                 # Now post the blog content to WordPress
                 title = "Generated Blog Post: " + keyword  # You can customize the title
-                html = markdown.markdown(response)
-                creator.postwordpress(content=html, title=title)
+                # html = markdown.markdown(response)
+                # creator.postwordpress(content=html, title=title)
                 
                 st.snow()
         except Exception as e:

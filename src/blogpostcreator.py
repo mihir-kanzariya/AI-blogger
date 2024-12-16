@@ -17,12 +17,13 @@ import os
 import requests
 
 class BlogPostCreator:
-    def __init__(self, keyword, number_of_web_references, wp_url, wp_user, wp_pass):
+    def __init__(self, keyword, number_of_web_references, wp_url, wp_user, wp_pass, userprompt):
         self.keyword = keyword
         self.number_of_web_references = number_of_web_references
         self.wp_url = wp_url
         self.wp_user = wp_user
         self.wp_pass = wp_pass
+        self.userprompt = userprompt
 
     def parse_links(self, search_results):
         print("-----------------------------------")
@@ -97,7 +98,7 @@ class BlogPostCreator:
                 wp_pass="i5llP@XHuwG&EIIjuZuTCI2f"  # Add your WordPress credentials her
 
                 # Define self and docs variables
-                self = BlogPostCreator(keyword=self.keyword, number_of_web_references=self.number_of_web_references,  wp_url=wp_url, wp_user=wp_user, wp_pass=wp_pass)
+                self = BlogPostCreator(keyword=self.keyword, number_of_web_references=self.number_of_web_references,  wp_url=wp_url, wp_user=wp_user, wp_pass=wp_pass, userprompt=self.userprompt)
                 docs = []
 
                 # Define splitter variable
@@ -131,7 +132,7 @@ class BlogPostCreator:
 
                 template = """
                     Given the following information, generate a blog post                   
-                    Write a full blog post that will rank for the following keywords: {keyword}                 
+                        
                     
                     Instructions:
                     The blog should be properly and beautifully formatted using markdown.
@@ -255,100 +256,100 @@ class BlogPostCreator:
                     - Use a professional yet approachable tone.
                     - Avoid making exaggerated or unsupported claims.
 
-                Your task is to create high-quality, trustworthy, and user-friendly content while avoiding common pitfalls that lead to poor-quality or failed evaluations. Follow these instructions carefully:
+                    Your task is to create high-quality, trustworthy, and user-friendly content while avoiding common pitfalls that lead to poor-quality or failed evaluations. Follow these instructions carefully:
 
----
+                    ---
 
- Key Objectives:
-1. Ensure the content is accurate, original, and relevant to the audience.
-2. Demonstrate Experience, Expertise, Authoritativeness, and Trustworthiness (E-E-A-T) principles.
-3. Avoid any practices or content types that result in failed quality checks or negative user experiences.
+                    Key Objectives:
+                    1. Ensure the content is accurate, original, and relevant to the audience.
+                    2. Demonstrate Experience, Expertise, Authoritativeness, and Trustworthiness (E-E-A-T) principles.
+                    3. Avoid any practices or content types that result in failed quality checks or negative user experiences.
 
----
+                    ---
 
- Avoid the Following Poor-Quality Practices:
+                    Avoid the Following Poor-Quality Practices:
 
-1. Harmful or Misleading Content:
-- Do not create content with deceptive claims, inaccurate facts, or potentially harmful advice.
-- Avoid clickbait titles or statements that do not align with the actual content.
+                    1. Harmful or Misleading Content:
+                    - Do not create content with deceptive claims, inaccurate facts, or potentially harmful advice.
+                    - Avoid clickbait titles or statements that do not align with the actual content.
 
-2. Lack of Transparency:
-- Always include clear details about the purpose of the page and the credentials of the author or organization.
-- Avoid anonymous or unverifiable claims. Include an "About Us" or "Contact" section where necessary.
+                    2. Lack of Transparency:
+                    - Always include clear details about the purpose of the page and the credentials of the author or organization.
+                    - Avoid anonymous or unverifiable claims. Include an "About Us" or "Contact" section where necessary.
 
-3. Copied or Low-Effort Content:
-- Avoid duplicating content from other sources without adding value or originality.
-- Do not use auto-generated or poorly curated content that lacks human effort.
+                    3. Copied or Low-Effort Content:
+                    - Avoid duplicating content from other sources without adding value or originality.
+                    - Do not use auto-generated or poorly curated content that lacks human effort.
 
-4. Distracting Ads or Poor Design:
-- Ensure that the content is not overwhelmed by ads or monetization elements.
-- Avoid intrusive pop-ups or design choices that degrade the user experience.
+                    4. Distracting Ads or Poor Design:
+                    - Ensure that the content is not overwhelmed by ads or monetization elements.
+                    - Avoid intrusive pop-ups or design choices that degrade the user experience.
 
-5. Irrelevant or Minimal Content:
-- Avoid publishing pages with little to no actionable or useful information.
-- Ensure the main content (MC) aligns with the page’s title and purpose.
+                    5. Irrelevant or Minimal Content:
+                    - Avoid publishing pages with little to no actionable or useful information.
+                    - Ensure the main content (MC) aligns with the page’s title and purpose.
 
-6. Unverified or Unsupported Claims:
-- Do not make exaggerated promises or unsupported statements (e.g., "Guaranteed 10x results overnight").
-- Always include credible sources, citations, or references to back up claims.
+                    6. Unverified or Unsupported Claims:
+                    - Do not make exaggerated promises or unsupported statements (e.g., "Guaranteed 10x results overnight").
+                    - Always include credible sources, citations, or references to back up claims.
 
----
+                    ---
 
- Best Practices to Follow:
-1. Content Quality:
-   - Write detailed, informative, and well-researched posts that satisfy the user’s intent.
-   - Ensure originality, and add unique insights or perspectives to distinguish your content.
+                    Best Practices to Follow:
+                    1. Content Quality:
+                    - Write detailed, informative, and well-researched posts that satisfy the user’s intent.
+                    - Ensure originality, and add unique insights or perspectives to distinguish your content.
 
-2. User-Centered Design:
-   - Make your page easy to navigate and free from unnecessary distractions.
-   - Include appropriate headings, visuals, and a clear call-to-action (CTA) where relevant.
+                    2. User-Centered Design:
+                    - Make your page easy to navigate and free from unnecessary distractions.
+                    - Include appropriate headings, visuals, and a clear call-to-action (CTA) where relevant.
 
-3. Transparency:
-   - Provide clear information about the author or organization behind the content.
-   - Include credentials, contact information, or links to support credibility.
+                    3. Transparency:
+                    - Provide clear information about the author or organization behind the content.
+                    - Include credentials, contact information, or links to support credibility.
 
-4. Regular Updates:
-   - Ensure that the content is timely and accurate. Regularly update older posts to maintain relevance.
+                    4. Regular Updates:
+                    - Ensure that the content is timely and accurate. Regularly update older posts to maintain relevance.
 
----
-
-
-- Ensure Accuracy: Provide real examples and credible sources.
-- Avoid Misleading Claims: Do not overpromise features or results of AI tools.
-- Demonstrate Trustworthiness: Include testimonials or expert recommendations.
+                    ---
 
 
-Use simple indian english, human tone, avoid starting by "In today's fast-paced world," and similar kind of sentences, use simple english words, Do not use any type of hook to start blog or any paragraph,
-The content should be tailored for a [specific audience: e.g., students, professionals, researchers] and include the following elements based on the nature of the topic:
+                    - Ensure Accuracy: Provide real examples and credible sources.
+                    - Avoid Misleading Claims: Do not overpromise features or results of AI tools.
+                    - Demonstrate Trustworthiness: Include testimonials or expert recommendations.
 
-Engaging Hook: Start with a compelling hook or attention-grabbing statement to draw the reader in.
 
-Context/Background Information: Provide brief background or context on the topic to set the stage for the discussion.
+                    Use simple indian english, human tone, avoid starting by "In today's fast-paced world," and similar kind of sentences, use simple english words, Do not use any type of hook to start blog or any paragraph,
+                    The content should be tailored for a [specific audience: e.g., students, professionals, researchers] and include the following elements based on the nature of the topic:
 
-Clear Structure: Break the content into clear, logically structured sections (e.g., introduction, body, conclusion), using transitional phrases to connect ideas smoothly.
+                    Engaging Hook: Start with a compelling hook or attention-grabbing statement to draw the reader in.
 
-Tone:
+                    Context/Background Information: Provide brief background or context on the topic to set the stage for the discussion.
 
-If the topic is informative or academic, maintain a formal, neutral tone.
-If the topic is motivational or self-improvement, use an inspirational, encouraging tone.
-For persuasive content, adopt a convincing and authoritative tone.
-For casual or conversational topics, use a friendly, approachable tone.
-Examples and Anecdotes: Include relevant examples or short anecdotes that help clarify the topic and make it relatable to the audience.
+                    Clear Structure: Break the content into clear, logically structured sections (e.g., introduction, body, conclusion), using transitional phrases to connect ideas smoothly.
 
-Analogies and Metaphors: If appropriate, use analogies or metaphors to simplify complex ideas and make them easier to understand.
+                    Tone:
 
-Problem-Solution Structure: If the topic involves challenges, outline the problem and propose practical solutions, offering actionable insights or recommendations.
+                    If the topic is informative or academic, maintain a formal, neutral tone.
+                    If the topic is motivational or self-improvement, use an inspirational, encouraging tone.
+                    For persuasive content, adopt a convincing and authoritative tone.
+                    For casual or conversational topics, use a friendly, approachable tone.
+                    Examples and Anecdotes: Include relevant examples or short anecdotes that help clarify the topic and make it relatable to the audience.
 
-Rhetorical Questions: Use rhetorical questions to engage the reader and provoke thought.
+                    Analogies and Metaphors: If appropriate, use analogies or metaphors to simplify complex ideas and make them easier to understand.
 
-Data and Statistics: Include relevant data, facts, or research findings to support claims, making the content more credible.
+                    Problem-Solution Structure: If the topic involves challenges, outline the problem and propose practical solutions, offering actionable insights or recommendations.
 
-Emotional Appeal: When appropriate, appeal to the reader's emotions, especially for topics related to personal growth, challenges, or motivation.
+                    Rhetorical Questions: Use rhetorical questions to engage the reader and provoke thought.
+
+                    Data and Statistics: Include relevant data, facts, or research findings to support claims, making the content more credible.
+
+                    Emotional Appeal: When appropriate, appeal to the reader's emotions, especially for topics related to personal growth, challenges, or motivation.
                     
 
                     Context: {context}
 
-                    
+                    Please also folow below guidance to create blog post: {userprompt}
 
                     Blog Post: 
                 
@@ -359,14 +360,25 @@ Emotional Appeal: When appropriate, appeal to the reader's emotions, especially 
                 def format_docs(docs):
                     return "\n\n".join(doc.page_content for doc in docs)
 
+               # Set up the chain with correct context and handling for inputs
                 chain = (
-                    {"context": retriever | format_docs, "keyword": RunnablePassthrough()}
+                    {"context": retriever | format_docs, "keyword": RunnablePassthrough(), "userprompt": RunnablePassthrough() or None}
                     | prompt
                     | llm
                     | StrOutputParser()
                 )
-                
-                return chain.invoke(input=self.keyword)
+
+                final_input = template.format(keyword=self.keyword, context=retriever, userprompt=self.userprompt)
+
+                # You need to pass keyword and userprompt as arguments directly to the chain if required
+                # inputs = {
+                #     "keyword": self.keyword,  # Assuming 'keyword' is what is required for context
+                #     "userprompt": self.userprompt  # 'userprompt' can be passed as an optional parameter
+                # }
+
+                # Call the chain's invoke method with the appropriate inputs
+                return chain.invoke(final_input)
 
             except Exception as e:
                 return e
+            
