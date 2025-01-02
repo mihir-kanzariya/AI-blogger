@@ -161,4 +161,5 @@ zipp==3.19.0
 googlesearch-python>=1.0.0
 markdown>=3.7.0
 PyGithub>=2.5.0
+boto3>=1.35.90
 
