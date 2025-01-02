@@ -1,6 +1,12 @@
 import os
 import re
 import bs4
+import openai
+import boto3
+from io import BytesIO
+import requests
+import streamlit as st
+
 
 from googlesearch import search  # Import for Google Search
 from langchain_community.tools import DuckDuckGoSearchResults
@@ -381,4 +387,66 @@ class BlogPostCreator:
 
             except Exception as e:
                 return e
-            
+    
+
+    def generate_and_upload_image(prompt):
+        """
+        Generate an image using OpenAI GPT-4o, upload it to Wasabi, and return the upload link.
+
+        Args:
+            prompt (str): The prompt for image generation.
+
+        Returns:
+            str: The upload link of the image in Wasabi.
+        """
+        # Set up OpenAI API key
+        openai.api_key = st.secrets['OPENAI_API_KEY']
+
+        # Set up Wasabi credentials
+        
+        # Set up Wasabi credentials
+        wasabi_access_key = "PB3SF6B4ZHEXUOIAGRRT"
+        wasabi_secret_key = "iTyUyfSIXINE0uP6lAakTbHNWtlBsOzYRXD9Jmw0"
+        wasabi_bucket_name = "static.pdfgpt.io"
+        wasabi_endpoint_url = "s3.us-west-1.wasabisys.com"  # Adjust if needed
+
+        # Initialize Wasabi S3 client
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=wasabi_access_key,
+            aws_secret_access_key=wasabi_secret_key,
+            endpoint_url=wasabi_endpoint_url
+        )
+
+        try:
+            # Generate the image
+            response = openai.Image.create(
+                prompt=prompt,
+                n=1,
+                size="1024x1024"
+            )
+            image_url = response["data"][0]["url"]
+
+            # Download the image
+            image_response = requests.get(image_url, stream=True)
+            image_response.raise_for_status()
+            image_content = BytesIO(image_response.content)
+
+            # Define the file name
+            file_name = f"mihirkanzariya.com/generated_image_{hash(prompt)}.png"
+
+            # Upload the image to Wasabi
+            s3_client.upload_fileobj(
+                image_content,
+                wasabi_bucket_name,
+                file_name,
+                ExtraArgs={"ContentType": "image/png"}
+            )
+
+            # Generate the upload link
+            upload_link = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{file_name}"
+            print("🚀 ~ upload_link:", upload_link)
+            return upload_link
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to generate or upload image: {e}")

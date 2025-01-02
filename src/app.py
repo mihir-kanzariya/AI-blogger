@@ -120,6 +120,12 @@ elif submitted:
                 
                 # Now post the blog content to WordPress
                 title = "Generated Blog Post: " + keyword  # You can customize the title
+                creator.generate_and_upload_image("""Generate image for blog : Web Application Security Best Practices to Safeguard Your App
+
+use vectors in image
+Size should be : 1200px by 630px
+
+Mentioned PdfGPT.IO top left corner""")
                 html = markdown.markdown(response)
                 creator.postwordpress(content=html, title=title)
                 
