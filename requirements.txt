@@ -62,7 +62,7 @@ jsonpointer==2.4
 jsonschema==4.22.0
 jsonschema-specifications==2023.12.1
 kubernetes==29.0.0
-langchain==0.2.1
+langchain==0.3.13
 langchain-chroma==0.1.1
 langchain-community==0.2.1
 langchain-core==0.2.3
@@ -162,4 +162,5 @@ googlesearch-python>=1.0.0
 markdown>=3.7.0
 PyGithub>=2.5.0
 boto3>=1.35.90
+
 
