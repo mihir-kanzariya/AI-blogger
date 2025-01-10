@@ -1,6 +1,9 @@
+# app.py
+
 import streamlit as st
 from dotenv import load_dotenv
 import markdown
+import re
 
 
 
@@ -99,8 +102,9 @@ elif submitted:
     wp_url=st.secrets['WP_URL']
     wp_user=st.secrets['WP_USER']
     wp_pass=st.secrets['WP_PASS']  # Add your WordPress credentials her
+    api_key=st.secrets['OPENAI_API_KEY']
     print("userprompt", userprompt)
-    creator = BlogPostCreator(keyword, web_references, wp_url, wp_user, wp_pass, userprompt)  # Pass the required arguments
+    creator = BlogPostCreator(keyword, web_references, wp_url, wp_user, wp_pass, userprompt, api_key)  # Pass the required arguments
 
     links = creator.get_links()
     intialMessage = "Generating your blog post with the provided links.."
@@ -117,16 +121,17 @@ elif submitted:
                 st.success("Blog post generated successfully!")
                 st.write("### Generated Blog Post")
                 st.write(response)
-                
+                first_line = re.sub(r"#\s*", "",  response.splitlines()[0].strip('"'))
+
+                 
+                # print("🚀 ~ response:", response)
+                print("<<<<<<<<   TITLE IS: ",first_line )
                 # Now post the blog content to WordPress
-                title = "Generated Blog Post: " + keyword  # You can customize the title
-                creator.generate_and_upload_image("""Generate image for blog : Web Application Security Best Practices to Safeguard Your App
-
-use vectors in image
-Size should be : 1200px by 630px
-
-Mentioned PdfGPT.IO top left corner""")
+                # title = "Generated Blog Post: " + keyword  # You can customize the title
+                
                 html = markdown.markdown(response)
+                title = first_line
+                # title = creator.fetch_blog_title(response)
                 creator.postwordpress(content=html, title=title)
                 
                 st.snow()

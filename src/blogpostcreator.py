@@ -1,8 +1,20 @@
+# blogpostcreator.py
+
+
 import os
+
+
+import sys
+
+
+# Add the current working directory to sys.path
+sys.path.append(os.getcwd())
+
+
 import re
 import bs4
 import openai
-import boto3
+
 from io import BytesIO
 import requests
 import streamlit as st
@@ -23,12 +35,14 @@ import os
 import requests
 
 class BlogPostCreator:
-    def __init__(self, keyword, number_of_web_references, wp_url, wp_user, wp_pass, userprompt):
+    def __init__(self, keyword, number_of_web_references, wp_url, wp_user, wp_pass, userprompt, api_key):
         self.keyword = keyword
         self.number_of_web_references = number_of_web_references
         self.wp_url = wp_url
         self.wp_user = wp_user
         self.wp_pass = wp_pass
+        self.api_key = api_key
+
         self.userprompt = userprompt
 
     def parse_links(self, search_results):
@@ -54,13 +68,41 @@ class BlogPostCreator:
         
         # Construct the endpoint for WordPress REST API
         url = f"{self.wp_url}/wp-json/wp/v2/posts"
-        
+        api_url = "https://apis-stg.pdfgpt.io/api/v1/admin/Generate-blog-image"
+
+    
+        payload = {
+            "prompt": "AI-powered tools transforming the workplace"
+        }
+        # Initialize variables
+        media_id = None
+        upload_link = None
+        # Make the API call
+        try:
+            response = requests.post(api_url, json=payload)
+            
+            if response.status_code == 200:
+                # Parse the JSON response
+                data = response.json()
+                upload_link = data.get("uploadLink")
+                media_id = data.get("mediaId")
+                
+                print("Image Generated Successfully!")
+                print(f"Upload Link: {upload_link}")
+                print(f"Media ID: {media_id}")
+            else:
+                print(f"Failed to generate blog image. Status Code: {response.status_code}")
+                print("Response:", response.text)
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
         # Prepare the payload for the POST request
         payload = {
             'title': title,
             'content': content,
             'status': 'draft',  # To directly publish the post
-            'categories': [category_id]  # Pass the category ID instead of name
+            'categories': [category_id],  # Pass the category ID instead of name
+            'featured_media': media_id
+            
         }
 
         # Authentication using Application Password
@@ -99,12 +141,15 @@ class BlogPostCreator:
             try:
                 print("-----------------------------------")
                 print("Creating blog post ...")
-                wp_url="https://wp-admin.pdfgpt.io/"
-                wp_user="utsav.prajapati@bacancy.com"
-                wp_pass="i5llP@XHuwG&EIIjuZuTCI2f"  # Add your WordPress credentials her
+               
+
+
+                wp_url="https://wordpress-nfgj.onrender.com/"
+                wp_user="Kanzariyamihir@gmail.com"
+                wp_pass="&$*7YqGdab2lLx770t"  # Add your WordPress credentials her
 
                 # Define self and docs variables
-                self = BlogPostCreator(keyword=self.keyword, number_of_web_references=self.number_of_web_references,  wp_url=wp_url, wp_user=wp_user, wp_pass=wp_pass, userprompt=self.userprompt)
+                self = BlogPostCreator(keyword=self.keyword, number_of_web_references=self.number_of_web_references,  wp_url=wp_url, wp_user=wp_user, wp_pass=wp_pass, userprompt=self.userprompt, api_key=self.api_key)
                 docs = []
 
                 # Define splitter variable
@@ -116,24 +161,28 @@ class BlogPostCreator:
 
                 # Load documents
                 bs4_strainer = bs4.SoupStrainer(('p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'))
-
                 document_loader = WebBaseLoader(
                         web_path=self.get_links()  # `get_links` now returns a list of strings
 
                 )
+                print("dpcument loader finish")
 
                 docs = document_loader.load()
-
+                print("Split documents")
+                
                 # Split documents
                 splits = splitter.split_documents(docs)
 
                 # step 3: Indexing and vector storage
+                print(" ~ step 3:")
                 vector_store = FAISS.from_documents(documents=splits, embedding=OpenAIEmbeddings())
 
                 # step 4: retrieval
+                print(" ~ step 4:")
                 retriever = vector_store.as_retriever(search_type="similarity", search_kwards={"k": 10})
 
                 # step 5 : Generation
+                print(" ~ step 5:")
                 llm = ChatOpenAI(model="gpt-4o-mini") 
 
                 template = """
@@ -357,12 +406,26 @@ class BlogPostCreator:
 
                     Please also folow below guidance to create blog post: {userprompt}
 
-                    Blog Post: 
+                    SEO Guidance:
+                    Add Focus Keyword to the SEO title
+                    Use Focus Keyword at the beginning of your content
+                    Use Focus Keyword in the content.
+                    Use Focus Keyword in subheading(s) like H2, H3, H4, etc
+                    Keyword Density is 0. Aim for around 1% Keyword Density
+                    Link out to external resources
+                    Add DoFollow links pointing to external resources
+                    URL is 87 characters long. Consider shortening it.
+                    Add internal links in your content.
+                    Set a Focus Keyword for this content.
+                    Use the Focus Keyword near the beginning of SEO title
+                    Use short paragraphs
+                    Title should not be more than 75 character
                 
                 """
-
+                print(" ~ prompt:")
+                
                 prompt = PromptTemplate.from_template(template=template)
-
+                
                 def format_docs(docs):
                     return "\n\n".join(doc.page_content for doc in docs)
 
@@ -373,6 +436,7 @@ class BlogPostCreator:
                     | llm
                     | StrOutputParser()
                 )
+                print(" ~ final_input:")
 
                 final_input = template.format(keyword=self.keyword, context=retriever, userprompt=self.userprompt)
 
@@ -387,66 +451,44 @@ class BlogPostCreator:
 
             except Exception as e:
                 return e
-    
-
-    def generate_and_upload_image(prompt):
+    def fetch_blog_title(self, content: str) -> str:
         """
-        Generate an image using OpenAI GPT-4o, upload it to Wasabi, and return the upload link.
+        Extract a title for the given blog content using LangChain's ChatOpenAI.
 
         Args:
-            prompt (str): The prompt for image generation.
+            content (str): The content of the blog for which a title needs to be generated.
 
         Returns:
-            str: The upload link of the image in Wasabi.
+            str: The generated blog title or an error message.
         """
-        # Set up OpenAI API key
-        openai.api_key = st.secrets['OPENAI_API_KEY']
-
-        # Set up Wasabi credentials
+        print(">>>>>>>>>>   Fetching title")
         
-        # Set up Wasabi credentials
-        wasabi_access_key = "PB3SF6B4ZHEXUOIAGRRT"
-        wasabi_secret_key = "iTyUyfSIXINE0uP6lAakTbHNWtlBsOzYRXD9Jmw0"
-        wasabi_bucket_name = "static.pdfgpt.io"
-        wasabi_endpoint_url = "s3.us-west-1.wasabisys.com"  # Adjust if needed
-
-        # Initialize Wasabi S3 client
-        s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=wasabi_access_key,
-            aws_secret_access_key=wasabi_secret_key,
-            endpoint_url=wasabi_endpoint_url
-        )
-
+        # Define the prompt for title extraction
+        prompt = f"Extract a concise and engaging title for the following blog content:\n{content}"
+        
         try:
-            # Generate the image
-            response = openai.Image.create(
-                prompt=prompt,
-                n=1,
-                size="1024x1024"
-            )
-            image_url = response["data"][0]["url"]
-
-            # Download the image
-            image_response = requests.get(image_url, stream=True)
-            image_response.raise_for_status()
-            image_content = BytesIO(image_response.content)
-
-            # Define the file name
-            file_name = f"mihirkanzariya.com/generated_image_{hash(prompt)}.png"
-
-            # Upload the image to Wasabi
-            s3_client.upload_fileobj(
-                image_content,
-                wasabi_bucket_name,
-                file_name,
-                ExtraArgs={"ContentType": "image/png"}
+            # Initialize ChatOpenAI
+            chat = ChatOpenAI(
+                api_key=self.api_key,
+                model="gpt-4",  # Specify the GPT model
+                temperature=0.7,  # Creativity level
+                max_tokens=50  # Adjust for title length
             )
 
-            # Generate the upload link
-            upload_link = f"{wasabi_endpoint_url}/{wasabi_bucket_name}/{file_name}"
-            print("🚀 ~ upload_link:", upload_link)
-            return upload_link
+            # Call the OpenAI API
+            print("Calling the OpenAI API")
+            response = chat.invoke(
+                input=[
+                    {"role": "system", "content": "You are a helpful assistant skilled in generating titles for blogs. do not create by own just find from blog and return it, it must b a first line , do not change any words meaning or anything else"},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            print("🚀 ~ response:", response)
+
+            # Extract the title from the response
+            title = response.content.strip()
+            return title
 
         except Exception as e:
-            raise RuntimeError(f"Failed to generate or upload image: {e}")
+            print("An error occurred:", e)
+            return f"Error: Unable to generate title - {e}"
