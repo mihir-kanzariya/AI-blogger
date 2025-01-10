@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException, Form
+from fastapi.middleware.cors import CORSMiddleware
+
 from pydantic import BaseModel
 from .blogpostcreator import BlogPostCreator
 
@@ -10,6 +12,14 @@ import re
 load_dotenv()
 
 app = FastAPI(title="Blog Post Generator API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "https://ai-blogger-lgbr.onrender.com"],  # Frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods (e.g., POST, GET, DELETE)
+    allow_headers=["*"],  # Allow all headers (e.g., Authorization, Content-Type)
+)
 
 class BlogRequest(BaseModel):
     keyword: str
