@@ -15,7 +15,7 @@ app = FastAPI(title="Blog Post Generator API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://ai-blogger-lgbr.onrender.com", "https://www.writemycontex.com"],  # Frontend origin
+    allow_origins=["http://localhost:3000", "https://ai-blogger-lgbr.onrender.com", "https://www.writemycontex.com", "https://writemycontex.com"],  # Frontend origin
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods (e.g., POST, GET, DELETE)
     allow_headers=["*"],  # Allow all headers (e.g., Authorization, Content-Type)
