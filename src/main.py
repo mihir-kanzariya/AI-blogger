@@ -15,7 +15,7 @@ app = FastAPI(title="Blog Post Generator API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://ai-blogger-lgbr.onrender.com"],  # Frontend origin
+    allow_origins=["http://localhost:3000", "https://ai-blogger-lgbr.onrender.com", "https://www.writemycontex.com"],  # Frontend origin
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods (e.g., POST, GET, DELETE)
     allow_headers=["*"],  # Allow all headers (e.g., Authorization, Content-Type)
@@ -58,6 +58,7 @@ async def generate_blog_post(data: BlogRequest):
         # Generate blog post content
         links = creator.get_links()
         response = creator.create_blog_post()
+        print("🚀 ~ response:", response)
 
         if not response:
             raise HTTPException(status_code=500, detail="Failed to generate blog post.")
