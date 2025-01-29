@@ -45,11 +45,11 @@ class BlogPostCreator:
 
         self.userprompt = userprompt
 
-    def parse_links(self, search_results):
-        print("-----------------------------------")
-        print("Parsing links ...")
-        # No need for regex parsing here since `googlesearch-python` directly provides links
-        return search_results
+    # def parse_links(self, search_results):
+    #     print("-----------------------------------")
+    #     print("Parsing links ...")
+    #     # No need for regex parsing here since `googlesearch-python` directly provides links
+    #     return search_results
 
     def save_file(self, content: str, filename: str):
         print("-----------------------------------")
@@ -118,20 +118,31 @@ class BlogPostCreator:
 
 
 
+    def parse_links(self, results):
+        # Filter links that start with 'https://'
+        return [link for link in results if link.startswith("https://")]
+
     def get_links(self):
         try:
             print("-----------------------------------")
             print("Getting links using Google...")
 
+            # Log the keyword being searched
+            print(">>> Searching for:", self.keyword)
+
             # Convert the generator to a list
             results = list(search(self.keyword, num_results=self.number_of_web_references))
+            print("🚀 ~ Raw results:", results)
 
-            # Parse links (if necessary, e.g., further processing)
+            # Use parse_links for filtering
             links = self.parse_links(results)
+
+            # Log the retrieved links
             print("Retrieved links:")
             for idx, link in enumerate(links, start=1):
                 print(f"{idx}. {link}")
 
+            print("🚀 ~ Filtered links:", links)
             return links
 
         except Exception as e:
@@ -172,6 +183,7 @@ class BlogPostCreator:
                 
                 # Split documents
                 splits = splitter.split_documents(docs)
+                print("🚀 ~ splits:", splits)
 
                 # step 3: Indexing and vector storage
                 print(" ~ step 3:")
@@ -401,6 +413,15 @@ class BlogPostCreator:
 
                     Emotional Appeal: When appropriate, appeal to the reader's emotions, especially for topics related to personal growth, challenges, or motivation.
                     
+                    write like humam:
+                    Add Personal Touches: Use anecdotes or personal experiences. Make it relatable.
+                    Emotional Tone: Use words that evoke feelings. Not just facts.
+                    Short Sentences: Keep it simple. Don't overcomplicate.
+                    Ask Questions: Engage the reader. Make them think.
+                    You are an expert in this unique and special topic I'm writing about. Your output should mimic the style of an author that writes like I need you to. Vary sentence length. Write with perplexity and burstiness. Use grammar structures and vocabulary consistent with a CEFR C1 level English user. Avoid picturesque and colorful language, speak directly. Get to the point and stay on the point.
+                    using a conversational tone, incorporating personal anecdotes, relatable examples, and avoiding overly formal language; imagine you are explaining this concept to a friend.
+                    Use Simple indian English words
+
 
                     Context: {context}
 
